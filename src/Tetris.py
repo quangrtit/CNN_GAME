@@ -1,7 +1,9 @@
 import pygame
 import random
 import copy
-
+import numpy as np
+from copy import deepcopy
+from Agent import Agent
 # Cài đặt màn hình
 SCREEN_WIDTH = 1000  # Tăng chiều rộng để chứa bảng điểm
 SCREEN_HEIGHT = 600
@@ -245,7 +247,7 @@ class Tetris:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption('Tetris Battle')
+        pygame.display.set_caption('DAI CHÌM 2K4')
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 36)
         
@@ -268,6 +270,15 @@ class Tetris:
         # Tốc độ rơi
         self.drop_speed = 0.5 
         self.drop_time = 0
+        # Các action có thể dùng 
+        """
+            action_meaning = {
+                0: "drop",
+                1: "rotate_right",
+                2: "right",
+                3: "left", 
+            }
+        """
 
     def draw_game_area(self):
         # Vẽ khung bảng chơi
@@ -414,9 +425,133 @@ class Tetris:
         
         if self.is_valid_move(test_piece, 0, 0):
             self.current_piece = test_piece
-    def run(self):
+    def preprocess_input(self):
+        # padding left 5 unit and padding right 5 unit
+        binary_matrix = np.array(self.grid) 
+        for i in range(len(binary_matrix)):
+            for j in range(len(binary_matrix[0])):
+                binary_matrix[i][j] = 1 if binary_matrix[i][j] > 0 else 0
+        padding = 5
+        new_binary_matrix = np.zeros((20, 20), dtype=np.int32)
+        for i in range(len(binary_matrix)):
+            for j in range(len(binary_matrix[0])):
+                new_binary_matrix[i][padding + j] = binary_matrix[i][j]
+        # add block in new binary matrix
+        feasibles = []
+        block_start = deepcopy(self.current_piece)
+        block_start.current_shape_id = 0
+        b = block_start.now_block()
+        b = np.array(b).T
+        for x in range(BLOCK_WIDTH):
+            for y in range(BLOCK_LENGTH):
+                if b[x][y] > 0:
+                    feasibles.append([x, y])
+        if block_start.block_type() == 'I': # piece I
+            for i in range(len(feasibles)):
+                new_binary_matrix[-2 + feasibles[i][0]][feasibles[i][1]] = 1
+        elif block_start.block_type() == 'O': # piece O
+            for i in range(len(feasibles)):
+                new_binary_matrix[14 + feasibles[i][0]][feasibles[i][1]] = 1
+        elif block_start.block_type() == 'J': # piece J
+            for i in range(len(feasibles)):
+                new_binary_matrix[4 + feasibles[i][0]][feasibles[i][1]] = 1
+        elif block_start.block_type() == 'L': # piece L
+            for i in range(len(feasibles)):
+                new_binary_matrix[9 + feasibles[i][0]][feasibles[i][1]] = 1
+        elif block_start.block_type() == 'Z': # piece Z
+            for i in range(len(feasibles)):
+                new_binary_matrix[9 + feasibles[i][0]][17 + feasibles[i][1]] = 1
+        elif block_start.block_type() == 'S': # piece S
+            for i in range(len(feasibles)):
+                new_binary_matrix[-1 + feasibles[i][0]][17 + feasibles[i][1]] = 1
+        elif block_start.block_type() == 'T': # piece T
+            for i in range(len(feasibles)):
+                new_binary_matrix[4 + feasibles[i][0]][17 + feasibles[i][1]] = 1
+        return new_binary_matrix
+    def run_auto(self): # Cho AI chơi
+        agent = Agent()
+        while not self.game_over:
+            state = self.preprocess_input()
+            print(np.array(self.current_piece).T)
+            print(self.current_piece.block_type())
+            print(state)
+            action = agent.choose_action(state)
+            """
+                action_meaning = {
+                    0: "drop",
+                    1: "rotate_right",
+                    2: "right",
+                    3: "left", 
+                }
+            """
+            if action == 0: # Drop khối 
+                # Hard drop
+                while self.is_valid_move(self.current_piece, 0, 1):
+                    self.current_y += 1
+                    self.score += 2
+                self.lock_piece()
+            elif action == 1: # Xoay phải 
+                self.rotate_piece()
+            elif action == 2: # Dịch phải 
+                if self.is_valid_move(self.current_piece, 1, 0):
+                    self.current_x += 1
+            elif action == 3: # Dịch trái
+                if self.is_valid_move(self.current_piece, -1, 0):
+                    self.current_x -= 1
+            # # Xử lý sự kiện
+            # for event in pygame.event.get():
+            #     if event.type == pygame.QUIT:
+            #         return
+            #     if event.type == pygame.KEYDOWN:
+            #         if event.key == pygame.K_LEFT:
+            #             if self.is_valid_move(self.current_piece, -1, 0):
+            #                 self.current_x -= 1
+            #         elif event.key == pygame.K_RIGHT:
+            #             if self.is_valid_move(self.current_piece, 1, 0):
+            #                 self.current_x += 1
+            #         elif event.key == pygame.K_DOWN:
+            #             if self.is_valid_move(self.current_piece, 0, 1):
+            #                 self.current_y += 1
+            #                 self.score += 1
+            #         elif event.key == pygame.K_UP:
+            #             self.rotate_piece()
+            #         elif event.key == pygame.K_SPACE:
+            #             # Hard drop
+            #             while self.is_valid_move(self.current_piece, 0, 1):
+            #                 self.current_y += 1
+            #                 self.score += 2
+            #             self.lock_piece()
+            
+            # Tự động rơi
+            current_time = pygame.time.get_ticks() / 1000
+            if current_time - self.drop_time > self.drop_speed:
+                self.drop_time = current_time
+                if self.is_valid_move(self.current_piece, 0, 1):
+                    self.current_y += 1
+                else:
+                    self.lock_piece()
+            
+            # Vẽ màn hình
+            self.screen.fill((0, 0, 0))
+            self.draw_game_area()
+            self.draw_score_board()
+            self.draw_piece()
+            pygame.display.update()
+            self.clock.tick(60)
+
+        # Game Over
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
+                    pygame.quit()
+                    return
+            
+            self.draw_game_over()
+            pygame.display.update()
+    def run(self): # Cho người chơi 
         while not self.game_over:
             # Xử lý sự kiện
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
@@ -467,7 +602,3 @@ class Tetris:
             
             self.draw_game_over()
             pygame.display.update()
-
-if __name__ == '__main__':
-    game = Tetris()
-    game.run()

@@ -268,7 +268,7 @@ class Tetris:
         self.current_y = -2
         
         # Tốc độ rơi
-        self.drop_speed = 0.5 
+        self.drop_speed = 0.5 / 10
         self.drop_time = 0
         # Các action có thể dùng 
         """
@@ -467,14 +467,27 @@ class Tetris:
         elif block_start.block_type() == 'T': # piece T
             for i in range(len(feasibles)):
                 new_binary_matrix[4 + feasibles[i][0]][17 + feasibles[i][1]] = 1
+        # fill holes 
+        new_binary_matrix = np.copy(self.fill_holes(new_binary_matrix))
         return new_binary_matrix
+    def fill_holes(self, binary_matrix):
+        binary_matrix = binary_matrix.T
+        new_binary_matrix = np.copy(binary_matrix)
+        for i in range(5, len(binary_matrix) - 5):
+            occupied = 0  # Set the 'Occupied' flag to 0 for each new column
+            for j in range(0, len(binary_matrix[0])):  # Scan from top to bottom
+                if int(binary_matrix[i][j]) > 0:
+                    occupied = 1  # If a block is found, set the 'Occupied' flag to 1
+                if int(binary_matrix[i][j]) == 0 and occupied == 1: 
+                    new_binary_matrix[i][j] = 1
+        return new_binary_matrix.T 
     def run_auto(self): # Cho AI chơi
         agent = Agent()
         while not self.game_over:
             state = self.preprocess_input()
-            print(np.array(self.current_piece).T)
-            print(self.current_piece.block_type())
-            print(state)
+            # print(np.array(self.current_piece).T)
+            # print(self.current_piece.block_type())
+            # print(state)
             action = agent.choose_action(state)
             """
                 action_meaning = {
@@ -537,17 +550,17 @@ class Tetris:
             self.draw_score_board()
             self.draw_piece()
             pygame.display.update()
-            self.clock.tick(60)
+            self.clock.tick(30)
 
         # Game Over
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
-                    pygame.quit()
-                    return
+        # while True:
+        #     for event in pygame.event.get():
+        #         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
+        #             pygame.quit()
+        #             return
             
-            self.draw_game_over()
-            pygame.display.update()
+        #     self.draw_game_over()
+        #     pygame.display.update()
     def run(self): # Cho người chơi 
         while not self.game_over:
             # Xử lý sự kiện

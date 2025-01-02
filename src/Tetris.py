@@ -3,6 +3,7 @@ import random
 import copy
 import numpy as np
 from copy import deepcopy
+from collections import Counter
 from Agent import Agent
 # Cài đặt màn hình
 SCREEN_WIDTH = 1000  # Tăng chiều rộng để chứa bảng điểm
@@ -268,8 +269,8 @@ class Tetris:
         self.current_y = -2
         
         # Tốc độ rơi
-        self.drop_speed = 0.5 / 10
-        self.drop_time = 0
+        self.drop_speed = 0.5 
+        self.drop_time = 0 
         # Các action có thể dùng 
         """
             action_meaning = {
@@ -485,10 +486,8 @@ class Tetris:
         agent = Agent()
         while not self.game_over:
             state = self.preprocess_input()
-            # print(np.array(self.current_piece).T)
-            # print(self.current_piece.block_type())
-            # print(state)
             action = agent.choose_action(state)
+            # action = agent.choose_action_data(self)
             """
                 action_meaning = {
                     0: "drop",
@@ -550,7 +549,7 @@ class Tetris:
             self.draw_score_board()
             self.draw_piece()
             pygame.display.update()
-            self.clock.tick(30)
+            self.clock.tick(60)
 
         # Game Over
         # while True:

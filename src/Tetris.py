@@ -280,7 +280,46 @@ class Tetris:
                 3: "left", 
             }
         """
+        self.mode = "player"  # Chế độ mặc định là người chơi
+        self.mode_switch_time = 0  # Thời gian chuyển đổi chế độ
+        self.mode_switch_delay = 2000  # 2 giây (2000 ms)
+        
+        # Kích thước và vị trí các nút chuyển đổi chế độ
+        self.player_mode_button_rect = pygame.Rect(
+            SCORE_BOARD_X + 20, SCORE_BOARD_Y + 300, 100, 40
+        )
+        self.ai_mode_button_rect = pygame.Rect(
+            SCORE_BOARD_X + 130, SCORE_BOARD_Y + 300, 100, 40
+        )
 
+    def draw_mode_buttons(self):
+        # Vẽ nút "Player Mode"
+        pygame.draw.rect(self.screen, (0, 255, 0), self.player_mode_button_rect)
+        player_text = self.font.render("Player", True, (0, 0, 0))
+        self.screen.blit(player_text, (self.player_mode_button_rect.x + 10, self.player_mode_button_rect.y + 10))
+        
+        # Vẽ nút "AI Mode"
+        pygame.draw.rect(self.screen, (255, 0, 0), self.ai_mode_button_rect)
+        ai_text = self.font.render("AI", True, (0, 0, 0))
+        self.screen.blit(ai_text, (self.ai_mode_button_rect.x + 30, self.ai_mode_button_rect.y + 10))
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.player_mode_button_rect.collidepoint(event.pos):
+                    self.mode = "player"
+                    self.mode_switch_time = pygame.time.get_ticks()  # Lưu thời gian chuyển đổi
+                elif self.ai_mode_button_rect.collidepoint(event.pos):
+                    self.mode = "ai"
+                    self.mode_switch_time = pygame.time.get_ticks()  # Lưu thời gian chuyển đổi
+        return True
+
+    def check_mode_switch_timeout(self):
+        # Kiểm tra xem đã đủ thời gian để quay về chế độ mặc định chưa
+        current_time = pygame.time.get_ticks()
+        if current_time - self.mode_switch_time > self.mode_switch_delay and self.game_over:
+            self.mode = "ai"  # Quay về chế độ mặc định
     def draw_game_area(self):
         # Vẽ khung bảng chơi
         pygame.draw.rect(self.screen, (50, 50, 50), 
@@ -482,135 +521,208 @@ class Tetris:
                 if int(binary_matrix[i][j]) == 0 and occupied == 1: 
                     new_binary_matrix[i][j] = 1
         return new_binary_matrix.T 
-    def run_auto(self): # Cho AI chơi
+    # def run_auto(self): # Cho AI chơi
+    #     agent = Agent()
+    #     while not self.game_over:
+    #         state = self.preprocess_input()
+    #         action = agent.choose_action(state)
+    #         # action = agent.choose_action_data(self)
+    #         """
+    #             action_meaning = {
+    #                 0: "drop",
+    #                 1: "rotate_right",
+    #                 2: "right",
+    #                 3: "left", 
+    #             }
+    #         """
+    #         if action == 0: # Drop khối 
+    #             # Hard drop
+    #             while self.is_valid_move(self.current_piece, 0, 1):
+    #                 self.current_y += 1
+    #                 self.score += 2
+    #             self.lock_piece()
+    #         elif action == 1: # Xoay phải 
+    #             self.rotate_piece()
+    #         elif action == 2: # Dịch phải 
+    #             if self.is_valid_move(self.current_piece, 1, 0):
+    #                 self.current_x += 1
+    #         elif action == 3: # Dịch trái
+    #             if self.is_valid_move(self.current_piece, -1, 0):
+    #                 self.current_x -= 1
+    #         # # Xử lý sự kiện
+    #         # for event in pygame.event.get():
+    #         #     if event.type == pygame.QUIT:
+    #         #         return
+    #         #     if event.type == pygame.KEYDOWN:
+    #         #         if event.key == pygame.K_LEFT:
+    #         #             if self.is_valid_move(self.current_piece, -1, 0):
+    #         #                 self.current_x -= 1
+    #         #         elif event.key == pygame.K_RIGHT:
+    #         #             if self.is_valid_move(self.current_piece, 1, 0):
+    #         #                 self.current_x += 1
+    #         #         elif event.key == pygame.K_DOWN:
+    #         #             if self.is_valid_move(self.current_piece, 0, 1):
+    #         #                 self.current_y += 1
+    #         #                 self.score += 1
+    #         #         elif event.key == pygame.K_UP:
+    #         #             self.rotate_piece()
+    #         #         elif event.key == pygame.K_SPACE:
+    #         #             # Hard drop
+    #         #             while self.is_valid_move(self.current_piece, 0, 1):
+    #         #                 self.current_y += 1
+    #         #                 self.score += 2
+    #         #             self.lock_piece()
+            
+    #         # Tự động rơi
+    #         current_time = pygame.time.get_ticks() / 1000
+    #         if current_time - self.drop_time > self.drop_speed:
+    #             self.drop_time = current_time
+    #             if self.is_valid_move(self.current_piece, 0, 1):
+    #                 self.current_y += 1
+    #             else:
+    #                 self.lock_piece()
+            
+    #         # Vẽ màn hình
+    #         self.screen.fill((0, 0, 0))
+    #         self.draw_game_area()
+    #         self.draw_score_board()
+    #         self.draw_piece()
+    #         pygame.display.update()
+    #         self.clock.tick(60)
+
+    #     # Game Over
+    #     # while True:
+    #     #     for event in pygame.event.get():
+    #     #         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
+    #     #             pygame.quit()
+    #     #             return
+            
+    #     #     self.draw_game_over()
+    #     #     pygame.display.update()
+    # def run(self): # Cho người chơi 
+    #     while not self.game_over:
+    #         # Xử lý sự kiện
+
+    #         for event in pygame.event.get():
+    #             if event.type == pygame.QUIT:
+    #                 return
+                
+    #             if event.type == pygame.KEYDOWN:
+    #                 if event.key == pygame.K_LEFT:
+    #                     if self.is_valid_move(self.current_piece, -1, 0):
+    #                         self.current_x -= 1
+    #                 elif event.key == pygame.K_RIGHT:
+    #                     if self.is_valid_move(self.current_piece, 1, 0):
+    #                         self.current_x += 1
+    #                 elif event.key == pygame.K_DOWN:
+    #                     if self.is_valid_move(self.current_piece, 0, 1):
+    #                         self.current_y += 1
+    #                         self.score += 1
+    #                 elif event.key == pygame.K_UP:
+    #                     self.rotate_piece()
+    #                 elif event.key == pygame.K_SPACE:
+    #                     # Hard drop
+    #                     while self.is_valid_move(self.current_piece, 0, 1):
+    #                         self.current_y += 1
+    #                         self.score += 2
+    #                     self.lock_piece()
+            
+    #         # Tự động rơi
+    #         current_time = pygame.time.get_ticks() / 1000
+    #         if current_time - self.drop_time > self.drop_speed:
+    #             self.drop_time = current_time
+    #             if self.is_valid_move(self.current_piece, 0, 1):
+    #                 self.current_y += 1
+    #             else:
+    #                 self.lock_piece()
+            
+    #         # Vẽ màn hình
+    #         self.screen.fill((0, 0, 0))
+    #         self.draw_game_area()
+    #         self.draw_score_board()
+    #         self.draw_piece()
+    #         pygame.display.update()
+    #         self.clock.tick(60)
+
+    #     # Game Over
+    #     while True:
+    #         for event in pygame.event.get():
+    #             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
+    #                 pygame.quit()
+    #                 return
+            
+    #         self.draw_game_over()
+    #         pygame.display.update()
+    def run_player_mode(self):
+        # Logic dành cho chế độ người chơi
+        current_time = pygame.time.get_ticks() / 1000
+        if current_time - self.drop_time > self.drop_speed:
+            self.drop_time = current_time
+            if self.is_valid_move(self.current_piece, 0, 1):
+                self.current_y += 1
+            else:
+                self.lock_piece()
+        
+        # Xử lý sự kiện bàn phím
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            if self.is_valid_move(self.current_piece, -1, 0):
+                self.current_x -= 1
+        if keys[pygame.K_RIGHT]:
+            if self.is_valid_move(self.current_piece, 1, 0):
+                self.current_x += 1
+        if keys[pygame.K_DOWN]:
+            if self.is_valid_move(self.current_piece, 0, 1):
+                self.current_y += 1
+                self.score += 1
+        if keys[pygame.K_UP]:
+            self.rotate_piece()
+        if keys[pygame.K_SPACE]:
+            # Hard drop
+            while self.is_valid_move(self.current_piece, 0, 1):
+                self.current_y += 1
+                self.score += 2
+            self.lock_piece()
+
+    def run_ai_mode(self, agent):
+        # Logic dành cho chế độ AI
+        state = self.preprocess_input()
+        action = agent.choose_action(state)
+        
+        if action == 0:  # Drop
+            while self.is_valid_move(self.current_piece, 0, 1):
+                self.current_y += 1
+                self.score += 2
+            self.lock_piece()
+        elif action == 1:  # Xoay phải
+            self.rotate_piece()
+        elif action == 2:  # Dịch phải
+            if self.is_valid_move(self.current_piece, 1, 0):
+                self.current_x += 1
+        elif action == 3:  # Dịch trái
+            if self.is_valid_move(self.current_piece, -1, 0):
+                self.current_x -= 1
+    def main_loop(self):
         agent = Agent()
         while not self.game_over:
-            state = self.preprocess_input()
-            action = agent.choose_action(state)
-            # action = agent.choose_action_data(self)
-            """
-                action_meaning = {
-                    0: "drop",
-                    1: "rotate_right",
-                    2: "right",
-                    3: "left", 
-                }
-            """
-            if action == 0: # Drop khối 
-                # Hard drop
-                while self.is_valid_move(self.current_piece, 0, 1):
-                    self.current_y += 1
-                    self.score += 2
-                self.lock_piece()
-            elif action == 1: # Xoay phải 
-                self.rotate_piece()
-            elif action == 2: # Dịch phải 
-                if self.is_valid_move(self.current_piece, 1, 0):
-                    self.current_x += 1
-            elif action == 3: # Dịch trái
-                if self.is_valid_move(self.current_piece, -1, 0):
-                    self.current_x -= 1
-            # # Xử lý sự kiện
-            # for event in pygame.event.get():
-            #     if event.type == pygame.QUIT:
-            #         return
-            #     if event.type == pygame.KEYDOWN:
-            #         if event.key == pygame.K_LEFT:
-            #             if self.is_valid_move(self.current_piece, -1, 0):
-            #                 self.current_x -= 1
-            #         elif event.key == pygame.K_RIGHT:
-            #             if self.is_valid_move(self.current_piece, 1, 0):
-            #                 self.current_x += 1
-            #         elif event.key == pygame.K_DOWN:
-            #             if self.is_valid_move(self.current_piece, 0, 1):
-            #                 self.current_y += 1
-            #                 self.score += 1
-            #         elif event.key == pygame.K_UP:
-            #             self.rotate_piece()
-            #         elif event.key == pygame.K_SPACE:
-            #             # Hard drop
-            #             while self.is_valid_move(self.current_piece, 0, 1):
-            #                 self.current_y += 1
-            #                 self.score += 2
-            #             self.lock_piece()
+            if not self.handle_events():
+                return
             
-            # Tự động rơi
-            current_time = pygame.time.get_ticks() / 1000
-            if current_time - self.drop_time > self.drop_speed:
-                self.drop_time = current_time
-                if self.is_valid_move(self.current_piece, 0, 1):
-                    self.current_y += 1
-                else:
-                    self.lock_piece()
+            # Kiểm tra thời gian chuyển đổi chế độ
+            self.check_mode_switch_timeout()
             
-            # Vẽ màn hình
+            # Chạy chế độ tương ứng
+            if self.mode == "player":
+                self.run_player_mode()
+            elif self.mode == "ai":
+                self.run_ai_mode(agent)
+            
+            # Vẽ giao diện
             self.screen.fill((0, 0, 0))
             self.draw_game_area()
             self.draw_score_board()
             self.draw_piece()
+            self.draw_mode_buttons()
             pygame.display.update()
-            self.clock.tick(60)
-
-        # Game Over
-        # while True:
-        #     for event in pygame.event.get():
-        #         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
-        #             pygame.quit()
-        #             return
             
-        #     self.draw_game_over()
-        #     pygame.display.update()
-    def run(self): # Cho người chơi 
-        while not self.game_over:
-            # Xử lý sự kiện
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    return
-                
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
-                        if self.is_valid_move(self.current_piece, -1, 0):
-                            self.current_x -= 1
-                    elif event.key == pygame.K_RIGHT:
-                        if self.is_valid_move(self.current_piece, 1, 0):
-                            self.current_x += 1
-                    elif event.key == pygame.K_DOWN:
-                        if self.is_valid_move(self.current_piece, 0, 1):
-                            self.current_y += 1
-                            self.score += 1
-                    elif event.key == pygame.K_UP:
-                        self.rotate_piece()
-                    elif event.key == pygame.K_SPACE:
-                        # Hard drop
-                        while self.is_valid_move(self.current_piece, 0, 1):
-                            self.current_y += 1
-                            self.score += 2
-                        self.lock_piece()
-            
-            # Tự động rơi
-            current_time = pygame.time.get_ticks() / 1000
-            if current_time - self.drop_time > self.drop_speed:
-                self.drop_time = current_time
-                if self.is_valid_move(self.current_piece, 0, 1):
-                    self.current_y += 1
-                else:
-                    self.lock_piece()
-            
-            # Vẽ màn hình
-            self.screen.fill((0, 0, 0))
-            self.draw_game_area()
-            self.draw_score_board()
-            self.draw_piece()
-            pygame.display.update()
-            self.clock.tick(60)
-
-        # Game Over
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
-                    pygame.quit()
-                    return
-            
-            self.draw_game_over()
-            pygame.display.update()
+            self.clock.tick(30)

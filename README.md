@@ -7,8 +7,8 @@ Here is my python source code for training a Tetris playing agent. It can be con
 ![Demo Tetris CNN](output-.gif)
 ## How to use my code
 With my code, you can:
-- Get data in [process_data.ipynb](< CrawlDataFromYoutube/process_data.ipynb>) and link colab https://colab.research.google.com/drive/1qh5x03UQ5lOYLzSYAtWhDAwC6uHMfCl0#scrollTo=qzLB4Ew5Mq_Q and link youtube I get data https://www.youtube.com/@ClassicTetris
-- Train your model and processing data in [preProcessDataAndTraning.ipynb](traningModel/preProcessDataAndTraning.ipynb) and link kaggle if you want run it https://www.kaggle.com/code/khngqungb22dccn654/cnn-tetris
+- Get data in [CrawlDataFromYoutube/process_data.ipynb](< CrawlDataFromYoutube/process_data.ipynb>) and link colab https://colab.research.google.com/drive/1qh5x03UQ5lOYLzSYAtWhDAwC6uHMfCl0#scrollTo=qzLB4Ew5Mq_Q and link youtube I get data https://www.youtube.com/@ClassicTetris
+- Train your model and processing data in [traningModel/preProcessDataAndTraning.ipynb](traningModel/preProcessDataAndTraning.ipynb) and link kaggle if you want run it https://www.kaggle.com/code/khngqungb22dccn654/cnn-tetris
 - Test your trained model by running `python test.py`
 
 ## Data Collection & Training Process

@@ -83,7 +83,7 @@ class Agent:
     def __init__(self, turn=0):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         model_file_path = "/home/quangai/game_ai_pytorch/TETRIS_CNN/CNN_GAME/src/models/weights_5000_epochs.pth"
-        model_file_path = "/home/quangai/game_ai_pytorch/TETRIS_CNN/CNN_GAME/src/models/model_tetris_cnn9.pth"
+        model_file_path = "/home/quangai/game_ai_pytorch/TETRIS_CNN/CNN_GAME/src/models/model_tetris_cnn11.pth"
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.main_NN = TetrisCNN().to(self.device)
         self.load_weight(model_file_path)

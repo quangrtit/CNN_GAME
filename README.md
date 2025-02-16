@@ -16,7 +16,7 @@ With my code, you can:
 - Test your trained model by running `python test.py`
 
 ## Data Collection & Training Process
-- If you want how i can get data from youtube and train you can read in [CNN_GAME/docs.pdf](CNN_GAME/docs.pdf)
+- If you want how i can get data from youtube and train you can read in [docs.pdf](docs.pdf)
 
 - The training data was collected from YouTube videos of world championship Tetris matches. Frames were extracted from the videos and processed into images for the CNN model.  
 

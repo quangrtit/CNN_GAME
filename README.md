@@ -7,16 +7,25 @@ Here is my python source code for training a Tetris playing agent. It can be con
 ![Demo Tetris CNN](output-.gif)
 ## How to use my code
 With my code, you can:
-- Get data in [CrawlDataFromYoutube/process_data.ipynb](< CrawlDataFromYoutube/process_data.ipynb>) and link colab https://colab.research.google.com/drive/1qh5x03UQ5lOYLzSYAtWhDAwC6uHMfCl0#scrollTo=qzLB4Ew5Mq_Q and link youtube I get data https://www.youtube.com/@ClassicTetris
-- Train your model and processing data in [traningModel/preProcessDataAndTraning.ipynb](traningModel/preProcessDataAndTraning.ipynb) and link kaggle if you want run it https://www.kaggle.com/code/khngqungb22dccn654/cnn-tetris
+- Get data in [CrawlDataFromYoutube/process_data.ipynb](< CrawlDataFromYoutube/process_data.ipynb>) and 
+- link colab https://colab.research.google.com/drive/1qh5x03UQ5lOYLzSYAtWhDAwC6uHMfCl0#scrollTo=qzLB4Ew5Mq_Q and 
+- link youtube I get data https://www.youtube.com/@ClassicTetris
+
+- Train your model and processing data in [traningModel/preProcessDataAndTraning.ipynb](traningModel/preProcessDataAndTraning.ipynb) and 
+- link kaggle if you want run it https://www.kaggle.com/code/khngqungb22dccn654/cnn-tetris
 - Test your trained model by running `python test.py`
 
 ## Data Collection & Training Process
+- If you want how i can get data from youtube and train you can read in [CNN_GAME/docs.pdf](CNN_GAME/docs.pdf)
 
 - The training data was collected from YouTube videos of world championship Tetris matches. Frames were extracted from the videos and processed into images for the CNN model.  
+
 - The data collection process was quite complex. The approach is outlined in `process_data.ipynb`, and the preprocessing steps are detailed in `preProcessDataAndTraning.ipynb`.  
+
 - After preprocessing, nearly **one million images** were available for training.  
-- After training for approximately **1000 epochs**, the model achieved a decent level of performance, clearing **30 to 80 lines** per game.  
+
+- After training for approximately **20000 epochs**, the model achieved a decent level of performance, clearing **30 to 80 lines** per game.  
+
 - Currently, I am optimizing the model with a goal of **200 complete lines**, but achieving this remains a challenge. 😅  
 
 ## Requirements
